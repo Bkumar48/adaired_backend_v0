@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+    
+    <title><%= orderTitle %></title>
+    <style>img.custom-logo{width: 120px !important;} a, button{cursor: pointer !important;}</style>
+</head>
+<body>
+    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="width:600px">
+    <tbody>
+    <tr>
+    <td>
+    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="width:600px">
+    <tbody>
+    <tr>
+    <td style="margin:0px auto;max-width:600px; background: #e3e3e375;">
+    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="width:600px;padding:5px 20px;border:1px solid #e3e3e3;border-bottom:none; background: #fffaee;">
+    <tbody>
+    <tr>
+    <td style="direction:ltr;display:inline-block;font-size:13px;text-align:left;vertical-align:top;width:100%">
+    <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="vertical-align:top" width="100%">
+    <tbody>
+    <tr>
+    <td align="left" style="font-family:Open Sans,Arial,sans-serif;font-size:12px;line-height:18px;text-align:center;text-decoration:none">
+        <a href="#" target="_blank"> 
+         <img src="https://beta.bulkaccounts.com/public/new_images/login_LOGO.png">
+        </a>
+</td>
+    </tr>
+    </tbody>
+    </table>
+    </td>
+    </tr>
+    </tbody>
+    </table>
+    </td>
+    </tr>
+    </tbody>
+    </table>
+    </td>
+    </tr>
+
+    <tr>
+    <td>
+    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="padding:30px 30px 14px;width:600px;font-family:Arial,sans-serif;color:#333333;border:1px solid #e3e3e3;background-color:#fff">
+    <tbody>
+    <tr>
+    <td>
+	 <% if (payment_status=="unpaid" &&  orderstatus == 'pending' ) { %>
+		<p style="font-size:15px;margin:0;padding: 0px 0px 15px;line-height:24px;color:#000;font-family:Arial,sans-serif;color:#333333"><strong>This order has been successfully generated and ready to pay.</strong> <br> Name : <%= name %><br> Email : <%= email %></p> 
+        <p style="font-size:15px;margin:0;padding: 0px 0px 15px;line-height:24px;color:#000;font-family:Arial,sans-serif;color:#333333">Payment method: <%=payment_method%></p>  
+        <% } %> 
+	 <!-- @elseif($orders['status'] == 'order_status')
+		
+		<p style="font-size:15px;margin:0;padding: 0px 0 15px;line-height:24px;color:#000">Status of your order Order No. - {{$orders['orders'][0]->order_number }} has been changed to {{ $orders['order_status'] }}.</p> -->
+	
+	 <% if (payment_status=="unpaid" && orderstatus == 'cancelled') { %>
+		<p style="font-size:15px;margin:0;padding: 0px 0px 15px;line-height:24px;color:#000;font-family:Arial,sans-serif;color:#333333"><strong>User has declined the payment.</strong>
+       <br> Name : <%= name %><br> Email : <%= email %></p>
+       <p style="font-size:15px;margin:0;padding: 0px 0px 15px;line-height:24px;color:#000;font-family:Arial,sans-serif;color:#333333">Payment method: <%=payment_method%></p>  
+    <%  } %>	
+	
+    <% if (payment_status=="unconfirmed" && orderstatus == 'pending') { %>
+		<p style="font-size:15px;margin:0;padding: 0px 0px 15px;line-height:24px;color:#000;font-family:Arial,sans-serif;color:#333333"><strong>You have entered the insufficient amount.</strong>
+        <br> Name : <%= name %><br> Email : <%= email %></p>
+         <p style="font-size:15px;margin:0;padding: 0px 0px 15px;line-height:24px;color:#000;font-family:Arial,sans-serif;color:#333333">Payment method: <%=payment_method%></p>  
+    <%  } %>	
+
+    <% if (payment_status=="unpaid" && orderstatus == 'failed') { %>
+		<p style="font-size:15px;margin:0;padding: 0px 0px 15px;line-height:24px;color:#000;font-family:Arial,sans-serif;color:#333333"><strong>Your order is failure.</strong>
+       <br> Name : <%= name %><br> Email : <%= email %></p>
+       <p style="font-size:15px;margin:0;padding: 0px 0px 15px;line-height:24px;color:#000;font-family:Arial,sans-serif;color:#333333">Payment method: <%=payment_method%></p>  
+    <%  } %>	
+    
+    
+    
+    <% if(payment_status == 'paid' && orderstatus == 'completed'){ %>
+		<p style="font-size:15px;margin:0;padding: 0px 0px 15px;line-height:24px;color:#000;font-family:Arial,sans-serif;color:#333333"><strong>Your have placed order successfully on the Order No. - <%= orderId %>. </strong><br> Name : <%= name %><br> Email : <%= email %></p>
+        <p style="font-size:15px;margin:0;padding: 0px 0px 15px;line-height:24px;color:#000;font-family:Arial,sans-serif;color:#333333">Payment method: <%=payment_method%></p>  
+        <% } %>
+	 <!-- @elseif($orders['status'] == 'newOrderAdmin')
+	
+		<p style="font-size:15px;margin:0;padding:0px 0 10px;line-height:24px;color: #000;">New order has been placed successfully.<br>  Name : <%= name %><br> Email : <%= email %></p>
+	
+	@endif  -->
+    
+    <table class="table" style="width: 100%;outline: 1px solid #ededed;background-color: transparent;"><tbody>    
+        <tr>
+        <th colspan="4" style="font-size: .8125rem;white-space: nowrap;font-weight: 600;padding: 1rem;vertical-align: top;outline: 1px solid #ededed;"> Order No. - <%= orderId %></th>
+        </tr>
+        <tr>
+        <th style="font-size: .8125rem;white-space: nowrap;font-weight: 600;padding: 1rem;vertical-align: top;outline: 1px solid #ededed;"> Product Name</th>
+        <th style="font-size: .8125rem;white-space: nowrap;font-weight: 600;padding: 1rem;vertical-align: top;outline: 1px solid #ededed;"> Quantity</th>
+        <th style="font-size: .8125rem;white-space: nowrap;font-weight: 600;padding: 1rem;vertical-align: top;outline: 1px solid #ededed;"> Amount Per Item	</th>
+        <th style="font-size: .8125rem;white-space: nowrap;font-weight: 600;padding: 1rem;vertical-align: top;outline: 1px solid #ededed;"> Amount	</th>
+        </tr>
+        <% items.forEach(function(item){ %>
+            <tr>
+            <td style="font-size: .8125rem;white-space: wrap;padding: 1rem;vertical-align: top;outline: 1px solid #e9ecef;"> <%= item.productTile %> </td> 
+            <td style="font-size: .8125rem;white-space: nowrap;padding: 1rem;vertical-align: top;outline: 1px solid #e9ecef;"> <%= item.quantity %> </td>
+            <td style="font-size: .8125rem;white-space: nowrap;padding: 1rem;vertical-align: top;outline: 1px solid #e9ecef;"> $ <%= parseFloat(item.price).toFixed(2) %></td>
+            <td style="font-size: .8125rem;white-space: nowrap;padding: 1rem;vertical-align: top;outline: 1px solid #e9ecef;"> $ <%= parseFloat(item.total).toFixed(2) %> </td>
+            </tr>
+            <% }) %>
+        
+        <tr><td><h3 style="  font-size: 25px;   color: #155aa5;">Payment Details</h3></td></tr>
+        <tr style="font-size: .8125rem;white-space: nowrap;padding: 1rem;vertical-align: top;outline: 1px solid #e9ecef;"><th>Total:</th>
+        <td></td>
+        <td></td>
+        <td align="right"><span>$</span> <%=parseFloat(actualPrice).toFixed(2) %></td>
+        </tr>
+        
+        <% if(couponDiscount>0){ %>
+		  <tr style="font-size: .8125rem;white-space: nowrap;padding: 1rem;vertical-align: top;outline: 1px solid #e9ecef;">
+			<th>Discount </th>
+				<td></td>
+				<td></td>
+         
+			<td align="right"><span>$</span> <%=parseFloat(couponDiscount).toFixed(2) %></td>
+		  </tr>
+        <% } %>
+        <tr style="font-size: .8125rem;white-space: nowrap;padding: 1rem;vertical-align: top;outline: 1px solid #e9ecef;">
+        <th> Amount Paid :</th>
+        <td></td>
+        <td></td>
+        <td align="right">
+             $ <%=parseFloat(amount).toFixed(2) %>
+           </td>
+        </tr>
+        
+        <tr>
+		<!-- @if($orders['status'] == 'newOrderUser')
+        <td colspan="4" style="text-align:center">
+        <p style="font-size:15px;margin:0;line-height:24px;padding:5px 0 0;color: #000;"><b>Note:</b> Order Processing will take upto 48 hours.</p>
+        </td>
+		@endif -->
+		<% if(payment_status == 'unpaid' && orderstatus == 'pending' || payment_status=="unconfirmed" && orderstatus == 'pending' ||  payment_status=="unpaid" && orderstatus == 'failed'){ %>
+        <td colspan="4" style="text-align:center">
+        <p style="font-size:15px;margin:0;line-height:24px;padding:5px 0 0;color: #000;">To complete the payment, click the pay button.</p>
+            <a href="<%=bit_pay_url %>">
+            <button style="padding: 0.5rem 0.75rem; cursor: pointer; font-size: 0.75rem; border-radius: 0.25rem;color: #fff; background-color: #00ac69; border-color: #00ac69; line-height: 1;" type="button">Pay Now Bitcoin</button>
+            </a>
+            <a href="<%=razor_pay_url %>">
+                <button style="padding: 0.5rem 0.75rem; cursor: pointer; font-size: 0.75rem; border-radius: 0.25rem;color: #fff; background-color: #00ac69; border-color: #00ac69; line-height: 1;" type="button">Pay Now Razorpay</button>
+                </a>
+        
+        
+        </td>
+		<% } %>
+
+     
+        </tr>
+        </tbody>
+    </table>
+    
+    
+    
+    <p style="font-size:16px;color: #000;">Best regards,<br>
+       <b style="font-size:16px">
+           <a style="font-family:Arial,sans-serif;color:#333333;text-decoration:none" href="" target="_blank">Team </a></b></p>
+    </td>
+    </tr>
+    </tbody>
+    </table>
+    </td>
+    </tr>
+    <tr>
+    <td>
+    <table align="center" border="0" cellpadding="0" cellspacing="0" role="presentation" style="background-color:transparent;width:600px">
+    <tbody>
+    <tr>
+    <td>
+    <table align="center" border="0" cellpadding="0" cellspacing="0" width="600" role="presentation" style="margin:0px auto;max-width:600px;text-align:center">
+    <tbody>
+    <tr>
+    <td style="direction:ltr;font-size:0px;padding:20px 0px;text-align:center;vertical-align:top">
+    <table border="0" cellpadding="0" cellspacing="0" role="presentation" style="direction:ltr;display:inline-block;font-size:11px;text-align:center;vertical-align:top;width:600px">
+    <tbody>
+    <tr>
+    <td style="padding:0 0px;vertical-align:top">
+    <table border="0" cellpadding="0" cellspacing="0" role="presentation">
+    <tbody>
+    <tr>
+    <td align="center" style="font-size:0px;word-break:break-word">
+        <p style="color:#000;font-family:Open Sans,Arial,sans-serif;font-size:11px;line-height:18px;text-align:center;text-transform:uppercase;margin:0">
+        <a href="<%= footer.webUrl %>privacy-policy" style="text-decoration:none;color:#777777" target="_blank">PRIVACY STATEMENT</a> | <a href="<%= footer.webUrl %>terms-conditions" style="text-decoration:none;color:#777777" target="_blank"> TERMS OF SERVICE </a> | <a href="<%= footer.webUrl %>about-us" style="text-decoration:none;color:#777777" target="_blank">ABOUT</a> </p>
+    </td>
+    </tr>
+    <tr>
+    <td align="center" style="font-size:0px;padding: 4px 0;word-break:break-word;">
+    <p style="color:#777777;font-family:Open Sans,Arial,sans-serif;font-size:11px;line-height:18px;text-align:center;text-transform:uppercase;margin:0"> &copy;<%=footer.currentYear%> <%=footer.appname%>. All Rights Reserved.</p>
+    </td>
+    </tr>
+    <tr>
+    <td align="center" style="font-size:0px;padding:0px;word-break:break-word">
+    <table border="0" cellpadding="0" cellspacing="0" style="width:600px;font-family:Helvetica,Arial,sans-serif;font-size:11px;line-height:22px;table-layout:auto;width:600px" width="600px">
+    <tbody>
+    <tr>
+    <td align="center" valign="top">
+    <table align="center" border="0" cellpadding="0" cellspacing="0">
+    <tbody>
+    <tr>
+    <td valign="top">
+        <a href=<%= footer.facebook_link %> style="text-decoration:none" target="_blank">
+            <img alt="Facebook" border="0" height="20" width="20" src="https://ci5.googleusercontent.com/proxy/YtUMaY5yir9kzkv2pBziFyMbyZQ9iab-luNXPih6Kl9KNhAArdXgqa51st93gGE9LtcvocP6tbV1Px4tRLaspPEaUr4SF3m4kK7VintMD3T4ZyoepArU_VRTyGLekjvNQYA3DDurVlnpxLDl=s0-d-e1-ft#https://getreviews.buzz/grb/storage/app/blog/hPGzelpzcJMoJhmvgMe4tV9eSSdWrp9N6A1oE6hx.png" style="display:block;font-family:Arial,sans-serif;font-size:11px;line-height:18px"></a></td><td width="5">
+            </a>
+        </td>
+        <td width="5">
+                &nbsp; 
+    </td>
+    
+    <td valign="top">
+        <a href=<%= footer.twitter_link %> style="text-decoration:none" target="_blank">
+            <img alt="Twitter" border="0" height="20" width="20" src="https://ci4.googleusercontent.com/proxy/98E3fd2MSBwLwK8GXSFy7SIQxh5nbEleqI23t6TjNBdieBJ6rCPKR3sOFeQIhEWbekB_TyzKuKZAYtOFZ9OGGf9k3wDiIrlIeq4TA3_wsvAgVnoDvNHQZzbdpQnx6WirjJIJGy4V7rgc_cMa=s0-d-e1-ft#https://getreviews.buzz/grb/storage/app/blog/URnSSQFmmp2WX1Q5GIEoniTaTFraekS5Ur4SOd4h.png" style="display:block;font-family:Arial,sans-serif;font-size:11px;line-height:18px">
+            </a> 
+    </td>
+    
+    <td width="5"> &nbsp;</td><td valign="top">
+        <a href="<%= footer.instagram_link %>" style="text-decoration:none" target="_blank">
+            <img alt="Instagram" border="0" height="20" width="20" src="https://ci4.googleusercontent.com/proxy/9SVNQs3FcBfRWMGUFQN49h5t8hPG3bj9eVKlGxSgpGcSsY_uFtEm_-Ir82xlGqIgWqQMp2hsBHEPn78g8AZUaxxJ-DrgQg7MHQKfEDPwiSE-dCYjw9rh4p6B2AJF8UZ4gVooANmcQtUD5lPx=s0-d-e1-ft#https://getreviews.buzz/grb/storage/app/blog/8jcZIon57DoymwHIZc5YrOkEbywjaR0BVlR7VruU.png" style="display:block;font-family:Arial,sans-serif;font-size:11px;line-height:18px">
+        </a>
+    </td>
+    <td width="5">&nbsp;</td>
+    <td valign="top">
+        <a href="https://api.whatsapp.com/send?phone=<%=footer.phone%>" style="text-decoration:none" target="_blank">
+            <img alt="Instagram" border="0" height="20" width="20" src="https://ci5.googleusercontent.com/proxy/Y2flaF214aVN1pBLLhVGYW0ay6HlsBJT33M-kDi-AWbrTUXCZN63ZR1aNt3ZOzcefCTkZnICWXhXqh1l9emAC6IPrxqvU2mU8pxOeSrDzoWJHbpM4LPyAI6YfI3oI407MGsBqnb4Xz1G3btu=s0-d-e1-ft#https://getreviews.buzz/grb/storage/app/blog/HzhdWmHINdb8V42lGj0GzsDINUZvCKG7eMFugDDz.png" style="display:block;font-family:Arial,sans-serif;font-size:11px;line-height:18px">
+        </a>
+    </td></tr>
+    </tbody>
+    </table>
+    </td>
+    </tr>
+    </tbody>
+    </table>
+    </td>
+    </tr>
+    </tbody>
+    </table>
+    </td>
+    </tr>
+    </tbody>
+    </table>
+    </td>
+    </tr>
+    </tbody>
+    </table>
+    </td>
+    </tr>
+    </tbody>
+    </table>
+    </td>
+    </tr>
+    </tbody>
+    </table>
+    </body>
+</html>
