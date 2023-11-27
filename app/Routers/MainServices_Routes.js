@@ -5,7 +5,7 @@ const { authMiddleware } = require("../Middleware/authMiddleware");
 
 router.post("/", authMiddleware, mainServiceController.createNewMainService);
 router.get("/", authMiddleware, mainServiceController.getAllMainServices);
-router.get("/:id", authMiddleware, mainServiceController.getSingleMainService);
+router.get("/:id", authMiddleware, mainServiceController.getMainServiceById);
 router.put("/:id", authMiddleware, mainServiceController.updateMainService);
 router.delete("/:id", authMiddleware, mainServiceController.deleteMainService);
 

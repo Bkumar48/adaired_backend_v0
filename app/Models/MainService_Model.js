@@ -5,7 +5,7 @@ const defaultString = { type: String, default: "" };
 
 const mainServiceSchema = new mongoose.Schema(
   {
-    serviceTitle: { ...defaultString, required: true },
+    serviceTitle: {...defaultString, required: true },
     serviceDescription: defaultString,
     serviceImage: defaultString,
     serviceDescriptionII: defaultString,
@@ -17,7 +17,7 @@ const mainServiceSchema = new mongoose.Schema(
     ourProcessImageII: defaultString,
     leftImage: defaultString,
     rightText: defaultString,
-    leftText: defaultString, 
+    leftText: defaultString,
     rightImage: defaultString,
     serviceHeadingIII: defaultString,
     serviceDescriptionIV: defaultString,
