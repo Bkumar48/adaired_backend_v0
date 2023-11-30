@@ -86,7 +86,7 @@ const getOneRole = asyncHandler(async (req, res) => {
   try {
     if (userInfo.roleType == "admin") {
       getList = true;
-    }
+    }b
     if (userInfo.roleType == "user" && permissions) {
       getList = true;
     }
