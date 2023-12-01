@@ -34,14 +34,10 @@ var userSchema = new mongoose.Schema(
         ref: "Role",
       },
     ],
-    roleType:{type: String,
-              enum: ["admin", "user"],
-              default: ""
-            },
+    roleType: { type: String, enum: ["admin", "user"], default: "" },
     status: {
-      type: Number,
-      enum: [0, 1],
-      default: 1
+      type: Boolean,
+      default: true,
     },
     refreshToken: {
       type: String,
@@ -63,4 +59,4 @@ var userSchema = new mongoose.Schema(
 // };
 
 //Export the model
-module.exports =  mongoose.models.User || mongoose.model('User', userSchema); 
+module.exports = mongoose.models.User || mongoose.model("User", userSchema);
