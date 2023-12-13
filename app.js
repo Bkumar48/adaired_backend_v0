@@ -26,7 +26,7 @@ const adminOrderRoute = require("./app/Routers/AdminOrderRoute")
 const testimonialRoute = require("./app/Routers/TestimonialRoute")
 const priceRuleRoute = require("./app/Routers/PriceRulesRoute")
 const frontRoute = require("./app/Routers/FrontRouter")
-const mainServiceRouter = require("./app/Routers/MainServices_Routes")
+const ServiceRouter = require("./app/Routers/Services_Routes") 
 
 require('dotenv').config();
 const port = process.env.NODE_PORT || 3000;
@@ -110,7 +110,7 @@ app.use("/nodeapi/api/vi/admin/testimonial",testimonialRoute)
 app.use("/nodeapi/api/v1/admin/pricerules",priceRuleRoute)
 
 // Use the MainService router
-app.use("/nodeapi/api/v1/admin/main-services", mainServiceRouter);
+app.use("/nodeapi/api/v1/admin/services", ServiceRouter);
 
 
 

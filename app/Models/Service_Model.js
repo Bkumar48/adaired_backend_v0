@@ -3,9 +3,23 @@ const mongoose = require("mongoose");
 
 const defaultString = { type: String, default: "" };
 
-const mainServiceSchema = new mongoose.Schema(
+const ServiceSchema = new mongoose.Schema(
   {
-    serviceTitle: {...defaultString, required: true },
+    isChildService: { type: Boolean, default: false },
+    parentId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Services",
+      default: null,
+    },
+    childrens: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Service",
+        default: [],
+      },
+    ],
+    serviceBanner: defaultString,
+    serviceTitle: { ...defaultString, required: true },
     serviceDescription: defaultString,
     serviceImage: defaultString,
     serviceDescriptionII: defaultString,
@@ -28,8 +42,8 @@ const mainServiceSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-mainServiceSchema.index({ serviceTitle: 1 });
+ServiceSchema.index({ serviceTitle: 1 });
 
-const mainService = mongoose.model("mainService", mainServiceSchema);
+const Service = mongoose.model("Service", ServiceSchema);
 
-module.exports = mainService;
+module.exports = Service;

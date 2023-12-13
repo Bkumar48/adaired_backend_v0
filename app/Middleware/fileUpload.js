@@ -197,7 +197,7 @@ const config = {
   UPLOAD_FAQ: process.env.UPLOAD_FAQ || "upload/faq/",
   UPLOAD_BLOG: process.env.UPLOAD_BLOG || "upload/blog/",
   UPLOAD_TESTIMONIAL: process.env.UPLOAD_TESTIMONIAL || "upload/testimonial/",
-  UPLOAD_MAIN_SERVICE: "public/images/mainService/", 
+  UPLOAD_SERVICE: "public/images/Services/", 
   FILE_UPLOAD_SIZE: process.env.FILE_UPLOAD_SIZE || 10000000000000,
   // ... other configuration values
 };
@@ -304,7 +304,7 @@ const testimonialImg = createImageMiddleware(config.UPLOAD_TESTIMONIAL);
  * @constant {Function} mainServiceImg
  * @description Middleware function for handling MainService image uploads.
  */
-const mainServiceImg = createImageMiddleware(config.UPLOAD_MAIN_SERVICE); 
+const ServiceImg = createImageMiddleware(config.UPLOAD_SERVICE); 
 
 module.exports = {
   categoryImg,
@@ -313,5 +313,5 @@ module.exports = {
   blogImg,
   faqImg,
   pageImg,
-  mainServiceImg,
+  ServiceImg,
 };
