@@ -5,15 +5,13 @@ var blogSchema = new mongoose.Schema(
   {
     title: {
       type: String,
-       
     },
     description: {
       type: String,
-      
     },
     category: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "BlogCategory", 
+      ref: "BlogCategory",
     },
     numViews: {
       type: Number,
@@ -41,13 +39,17 @@ var blogSchema = new mongoose.Schema(
     ],
     author: {
       type: mongoose.Schema.Types.ObjectId,
-      default: "User",
+      default: null,
+    },
+    updatedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      default: null,
     },
     slug: {
       type: String,
       unique: true,
     },
-    image:{type:String, default:""},
+    image: { type: String, default: "" },
   },
   {
     toJSON: {
@@ -61,4 +63,4 @@ var blogSchema = new mongoose.Schema(
 );
 
 //Export the model
-module.exports = mongoose.model("Blog", blogSchema);   
+module.exports = mongoose.model("Blog", blogSchema);

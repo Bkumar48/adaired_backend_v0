@@ -224,7 +224,8 @@ const createStorage = (destination) =>
   multer.diskStorage({
     destination,
     filename: (req, file, cb) =>
-      cb(null, `${file.fieldname}_${Date.now()}.jpg`),
+      // cb(null, `${file.fieldname}_${Date.now()}.jpg`),
+      cb(null, `${file.fieldname}_${Date.now()}.${file.originalname.split('.').pop()}`),
   });
 
 /**

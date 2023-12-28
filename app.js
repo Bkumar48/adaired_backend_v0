@@ -16,7 +16,7 @@ const customerRoute = require("./app/Routers/CustomerRoute")
 const ticketRoute = require("./app/Routers/TicketRoute")
 const userRoute = require("./app/Routers/UserRoute")
 const userRoleRoute = require("./app/Routers/RoleRouter")
-const blogCateRoute = require("./app/Routers/BlogCateRoute")
+// const blogCateRoute = require("./app/Routers/BlogCateRoute")
 const blogRoute = require("./app/Routers/BlogRoute")
 const couponRoute = require("./app/Routers/CouponRoute")
 const cartRoute = require("./app/Routers/CartRoute")
@@ -27,6 +27,8 @@ const testimonialRoute = require("./app/Routers/TestimonialRoute")
 const priceRuleRoute = require("./app/Routers/PriceRulesRoute")
 const frontRoute = require("./app/Routers/FrontRouter")
 const ServiceRouter = require("./app/Routers/Services_Routes") 
+
+const blogCategoryRouter = require("./app/Routers/BlogCategoryRoutes");
 
 require('dotenv').config();
 const port = process.env.NODE_PORT || 3000;
@@ -83,7 +85,7 @@ app.use("/nodeapi/api/v1/user",userRoute)
 app.use("/nodeapi/api/v1/users/roles",userRoleRoute)
 
 // Define blog in user/ admin access
-app.use("/nodeapi/api/v1/user/blogcate",blogCateRoute)
+// app.use("/nodeapi/api/v1/user/blogcate",blogCateRoute)
 
 // Define blog in user/admin access
 app.use("/nodeapi/api/v1/user/blog",blogRoute)
@@ -111,6 +113,9 @@ app.use("/nodeapi/api/v1/admin/pricerules",priceRuleRoute)
 
 // Use the MainService router
 app.use("/nodeapi/api/v1/admin/services", ServiceRouter);
+
+// Use the BlogCategory router
+app.use("/nodeapi/api/v1/admin/blogcategory", blogCategoryRouter);
 
 
 

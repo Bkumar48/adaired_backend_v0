@@ -19,10 +19,10 @@ const authMiddleware = asyncHandler(async (req, res, next) => {
         next();
       }
     } catch (err) {
-      return res.status(400).send({ status: false, massage: "Not Authorized!" })
+      return res.status(400).send({ status: false, msg: "Not Authorized!" })
       }
   } else {
-    return res.status(400).send({ status: false, massage: "Required Authencation!" })
+    return res.status(400).send({ status: false, msg: "Required Authencation!" })
   }
 });
 

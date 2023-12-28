@@ -164,13 +164,12 @@ const createNewService = handlePermission(
       console.log("Error in createNewService:", error);
 
       // If there's an error, you might want to remove the created service
-      if (service) {
-        await Service.findByIdAndRemove(service._id);
+      if (Service) {
+        await Service.findByIdAndRemove(Service._id);
       }
     }
   }
 );
-
 
 /**
  * Retrieve services based on query parameters.
@@ -194,6 +193,7 @@ const getServices = asyncHandler(async (req, res) => {
     } else if (parentId && childId) {
       // Find services with a specific parent and child
       query = { parentId, _id: ObjectId(childId) };
+      // query = { _id: { $in: [ObjectId(parentId), ObjectId(childId)] } };
     } else if (Id) {
       // Find a service by ID
       query = { _id: ObjectId(Id) };

@@ -1,303 +1,332 @@
 const Blog = require("../Models/BlogModal");
+const { ObjectId } = require("mongoose").Types;
 const asyncHandler = require("express-async-handler");
-const {blogImg} = require("../Middleware/fileUpload")
-const fs = require('fs');
-require('dotenv').config();
-const directoryPath = process.env.UPLOAD_BLOG;
-const createBlog = asyncHandler(async (req, res) => {
-  const UserInfo = req.userId
-  let getList="" ;
-  let permissions =""
-  if(UserInfo.role[0]!=undefined){
-      permissions = UserInfo.role[0].permissions[0].blogs.create== true
-  }
-  try {
-      if(UserInfo.roleType=="admin"){
-          getList= true
-       }
-      if(UserInfo.roleType=="user" &&  permissions){
-          getList= true
-      }
-      if(getList== true){
-        await blogImg(req, res, async function (err) {
-          if (err) {
-              return res.status(400).send({ status: false, massage: "Please check the image format" })
-          } else {
-             const {title, description,category, slug} = req.body
-             const image = req.file ? req.file.filename : req.file?.filename
-             const autherId = UserInfo._id;
-             const query = {title:title,description:description,category:category,author:autherId,slug:slug,image:image }
-             const newBlog = await Blog.create(query);
-             res.status(200).send({ status: true, message: "Blog created succesfully" });
-          }
-        });  
-  }
-  else{
-    return res.status(400).send({ status: false, message: "Access deny create blog !" })
-  } 
-  } 
-  catch (error) {
-    return res.status(400).send({ status: false, message: error.message })
-  }
-});
+const { blogImg } = require("../Middleware/fileUpload");
+const fs = require("fs").promises;
+const { StatusCodes } = require("http-status-codes");
+const BlogCategory = require("../Models/BlogCategoryModel");
+const uploadPath = process.env.UPLOAD_BLOG;
 
-// Update a blog
+const checkPermission = (userInfo, entity, action) =>
+  userInfo?.roleType === "admin" ||
+  userInfo?.role?.[0].permissions?.[0]?.[entity]?.[action];
 
-const updateBlog = asyncHandler(async (req, res) => {
-  const { id } = req.query;
-  
-  const UserInfo = req.userId
-  let getList="" ;
-  let permissions =""
-  if(UserInfo.role[0]!=undefined){
-      permissions = UserInfo.role[0].permissions[0].blogs.update== true
-  }
-  try {
-      if(UserInfo.roleType=="admin"){
-          getList= true
-       }
-      if(UserInfo.roleType=="user" &&  permissions){
-          getList= true
-      }
-      if(getList== true){
-        await blogImg(req, res, async function (err) {
-          if (err) {
-              return res.status(400).send({ status: false, massage: "Please check the image format" })
-          } else {
-             const {title, description,category, slug} = req.body
-             const image = req.file ? req.file.filename : req.file?.filename
-             const autherId = UserInfo._id;
-              // check the file is exist in upload time 
-              if(image){
-                let oldFileName = '';
-                const oldImage =   await Blog.findOne({ _id: id })
-                                    oldFileName = oldImage.image
-                                    fs.unlink(directoryPath + oldFileName, (err) => {
-                                    return res.status(400).send({ status: false, message: err.message })
-                                    });
-               }
-              const query = {title:title,description:description,category:category,author:autherId,slug:slug,image:image }
-              const newBlog = await Blog.findByIdAndUpdate(id, {$set:query});
-              res.status(200).send({ status: true, message: "Blog updated succesfully" });
+const handlePermission = (entity, action, uploadMiddleware, operation) =>
+  asyncHandler(async (req, res, next) => {
+    const { userId } = req;
+
+    if (!checkPermission(userId, entity, action)) {
+      return res
+        .status(StatusCodes.BAD_REQUEST)
+        .json({ error: "You are not allowed to perform this action" });
+    }
+
+    try {
+      await uploadMiddleware(req, res, async (err) => {
+        if (err) {
+          console.error(err);
+          return res
+            .status(StatusCodes.INTERNAL_SERVER_ERROR)
+            .json({ error: err.message });
+        }
+        const result = await operation(req, res, next);
+
+        result ? res.status(StatusCodes.OK).json({ result }) : next();
+      });
+    } catch (error) {
+      console.error(error);
+      res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: error.message });
+    }
+  });
+
+const performOperation = async (modelMethod, ...args) => modelMethod(...args);
+
+const setImageFields = async (req, Blog) => {
+  const imageFields = ["image"];
+
+  await Promise.all(
+    imageFields.map(async (field) => {
+      if (req.files?.length) {
+        const file = req.files.find((file) => file.fieldname === field);
+        if (file) {
+          if (Blog[field]) {
+            await deleteFile(uploadPath + Blog[field]);
           }
-        });  
-  }
-  else{
-    return res.status(400).send({ status: false, message: "Access deny update blog !" })
-  } 
+          Blog[field] = file.filename;
+        }
+      }
+    })
+  );
+  await Blog.save();
+};
+
+const deleteFile = async (filePath) => {
+  try {
+    await fs.unlink(filePath);
   } catch (error) {
-   return res.status(400).send({ status: false, message: error.message })
+    console.error(`Error deleting file : ${filePath}`, error);
   }
-});
+};
 
-// Fetch a blog
+const createBlog = handlePermission(
+  "Blog",
+  "create",
+  blogImg,
+  async (req, res) => {
+    try {
+      const category = req.body.category;
+      const { userId } = req;
+      const authorId = userId._id;
+      const { title, description, slug } = req.body;
+
+      const blog = await performOperation(Blog.create.bind(Blog), {
+        title,
+        description,
+        author: authorId,
+        updatedBy: authorId,
+        slug,
+        category: category,
+      });
+
+      // Find the category by ID
+      const foundCategory = await BlogCategory.findById(category);
+
+      if (!foundCategory) {
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .json({ error: "Category not found" });
+      }
+
+      // Push the blog's ID into the category's blogs array
+      foundCategory.blogs.push(blog._id);
+      await performOperation(foundCategory.save.bind(foundCategory));
+
+      await setImageFields(req, blog);
+      res.status(StatusCodes.OK).json({ result: blog });
+    } catch (error) {
+      console.error(error);
+      res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: error.message });
+    }
+  }
+);
+
+const updateBlog = handlePermission(
+  "Blog",
+  "update",
+  blogImg,
+  async (req, res) => {
+    try {
+      const { id } = req.params;
+      const { userId } = req;
+      const { title, description, category, slug } = req.body;
+
+      const existingBlog = await Blog.findById(id).lean();
+
+      if (!existingBlog) {
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .json({ error: "Blog not found" });
+      }
+
+      // Find the category by ID
+      const oldCategory = existingBlog.category;
+      const newCategory = category;
+
+      // Update only the fields that are present in the request body
+      const updatedFields = {};
+      if (title) updatedFields.title = title;
+      if (description) updatedFields.description = description;
+      if (category) updatedFields.category = category;
+      if (slug) updatedFields.slug = slug;
+      updatedFields.updatedBy = userId._id;
+
+      // Use updateOne for partial updates
+      await Blog.updateOne({ _id: id }, { $set: updatedFields });
+
+      // If the category is changed, pull the blog ID from the old category
+      // and push it into the new category
+      if (oldCategory !== newCategory) {
+        const oldCategoryObj = await BlogCategory.findById(oldCategory);
+        const newCategoryObj = await BlogCategory.findById(newCategory);
+
+        if (oldCategoryObj && newCategoryObj) {
+          oldCategoryObj.blogs.pull(id);
+          newCategoryObj.blogs.push(id);
+
+          await Promise.all([
+            performOperation(oldCategoryObj.save.bind(oldCategoryObj)),
+            performOperation(newCategoryObj.save.bind(newCategoryObj)),
+          ]);
+        }
+      }
+
+      res.status(StatusCodes.OK).json({ result: "Blog updated successfully" });
+    } catch (error) {
+      console.error(error);
+      res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: error.message });
+    }
+  }
+);
 const getBlog = asyncHandler(async (req, res) => {
-  const { id } = req.query;
-  // validateMongodbid(id);
-  const UserInfo = req.userId
-  let getList="" ;
-  let permissions =""
-  if(UserInfo.role[0]!=undefined){
-      permissions = UserInfo.role[0].permissions[0].blogs.read== true
-  }
+  const { Id } = req.query;
   try {
-      if(UserInfo.roleType=="admin"){
-          getList= true
-       }
-      if(UserInfo.roleType=="user" &&  permissions){
-          getList= true
-      }
-      if(getList== true){
-        const getBlog = await Blog.findById(id).populate("likes").populate("dislikes").populate('category');
-        res.status(200).send({ status: true,  data: getBlog});
-  }
-  else{
-    return res.status(400).send({ status: false, massage: "Access deny get blog !" })
-  } 
+    let query = {};
+
+    if (Id) {
+      query = { _id: ObjectId(Id) };
+    } else {
+      const blogs = await performOperation(Blog.find.bind(Blog));
+      res.status(StatusCodes.OK).json({ result: blogs });
+    }
+    const blog = await performOperation(Blog.find.bind(Blog), query);
+
+    if (!blog) {
+      return res
+        .status(StatusCodes.NOT_FOUND)
+        .json({ error: "Blog not found" });
+    }
+
+    res.status(StatusCodes.OK).json({ result: blog });
   } catch (error) {
-    return res.status(400).send({ status: false, message: error.message })
+    console.error(error);
+    res
+      .status(StatusCodes.INTERNAL_SERVER_ERROR)
+      .json({ error: error.message });
   }
 });
 
-// Get All blogs
+const deleteBlog = handlePermission(
+  "Blog",
+  "delete",
+  (req, res, next) => next(),
+  async (req, res, next) => {
+    try {
+      const { id } = req.params;
+      const blog = await performOperation(Blog.findById.bind(Blog), id);
 
-const getAllBlogs = asyncHandler(async (req, res) => {
-  const UserInfo = req.userId
-  let getList="" ;
-  let permissions =""
-  if(UserInfo.role[0]!=undefined){
-      permissions = UserInfo.role[0].permissions[0].blogs.read== true
-  }
-  try {
-      if(UserInfo.roleType=="admin"){
-          getList= true
-       }
-      if(UserInfo.roleType=="user" &&  permissions){
-          getList= true
+      if (!blog) {
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .json({ error: "Blog not found" });
       }
-      if(getList== true){
 
-        const limitValue = parseInt(req.query.limit || 2);
-        const skipValue = parseInt(req.query.skip || 0);
-        const getBlogs = await Blog.find().limit(limitValue).skip(skipValue);
-        res.status(200).send({ status: true, page:skipValue, limit:limitValue, data: getBlogs});
-       }
-  else{
-    return res.status(400).send({ status: false, massage: "Access deny get all blog !" })
-  } 
-  } catch (error) {
-    return res.status(400).send({ status: false, message: error.message })
-  }
-});
-
-// Delete a blogs
-
-const deleteBlog = asyncHandler(async (req, res) => {
-  const { id } = req.query;
-  
-  const UserInfo = req.userId
-  let getList="" ;
-  let permissions =""
-  if(UserInfo.role[0]!=undefined){
-      permissions = UserInfo.role[0].permissions[0].blogs.delete== true
-  }
-  try {
-      if(UserInfo.roleType=="admin"){
-          getList= true
-       }
-      if(UserInfo.roleType=="user" &&  permissions){
-          getList= true
+      if (blog.image) {
+        await deleteFile(uploadPath + blog.image);
       }
-      if(getList== true){
 
-        const getList = await Blog.findOne({ _id: id });
-        if (getList) {
-            let oldFileName = '';
-             oldFileName = getList.image
-            // check in files is exist in database
-            if (oldFileName) {
-                fs.unlink(directoryPath + oldFileName, (err) => {
-                });
-            }
-          } 
-        const deleteBlog = await Blog.findByIdAndDelete(id);
-        res.status(200).send({ status: true, message: "Blog deleted succesfully" });
-  } 
+      await performOperation(blog.remove.bind(blog));
 
-else{
-  return res.status(400).send({ status: false, massage: "Access deny delete blog !" })
-} 
-}
-  catch (error) {
-    return res.status(400).send({ status: false, message: error.message })
+      res.status(StatusCodes.OK).json({ message: "Blog deleted successfully" });
+    } catch (error) {
+      console.error(error);
+      res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: error.message });
+    }
   }
-});
+);
 
-// like blog
-const liketheBlog = asyncHandler(async (req, res) => {
-  const { blogId } = req.body;
-  // validateMongodbid(blogId);
-  // Find the blog which you want to be liked
-  const blog = await Blog.findById(blogId);
-  // find the login user
-  const loginUserId = req?.user?._id;
-  // find if the user has liked the blog
-  const isLiked = blog?.isLiked;
-  // find if the user has disliked the blog
-  const alreadyDisliked = blog?.dislikes?.find(
-    (userId) => userId?.toString() === loginUserId?.toString()
-  );
-  if (alreadyDisliked) {
-    const blog = await Blog.findByIdAndUpdate(
-      blogId,
-      {
-        $pull: { dislikes: loginUserId },
-        isDisliked: false,
-      },
-      { new: true }
-    );
-    res.json(blog);
-  }
-  if (isLiked) {
-    const blog = await Blog.findByIdAndUpdate(
-      blogId,
-      {
-        $pull: { likes: loginUserId },
-        isLiked: false,
-      },
-      { new: true }
-    );
-    res.json(blog);
-  } else {
-    const blog = await Blog.findByIdAndUpdate(
-      blogId,
-      {
-        $push: { likes: loginUserId },
-        isLiked: true,
-      },
-      { new: true }
-    );
-    res.json(blog);
-  }
-});
+const liketheBlog = handlePermission(
+  "Blog",
+  "like",
+  (req, res, next) => next(),
+  async (req, res, next) => {
+    try {
+      const { blogId } = req.body;
+      const blog = await performOperation(Blog.findById.bind(Blog), blogId);
 
+      if (!blog) {
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .json({ error: "Blog not found" });
+      }
 
+      const loginUserId = req?.userId?._id;
+      const isLiked = blog?.isLiked;
+      const alreadyDisliked = blog?.dislikes?.find(
+        (userId) => userId?.toString() === loginUserId?.toString()
+      );
 
-// Dislike the Blog
-const disliketheBlog = asyncHandler(async (req, res) => {
-  const { blogId } = req.body;
-  // validateMongodbid(blogId);
-  // Find the blog which you want to be liked
-  const blog = await Blog.findById(blogId);
-  // find the login user
-  const loginUserId = req?.user?._id;
-  // find if the user has liked the blog
-  const isDisLiked = blog?.isDisliked;
-  // find if the user has disliked the blog
-  const alreadyLiked = blog?.likes?.find(
-    (userId) => userId?.toString() === loginUserId?.toString()
-  );
-  if (alreadyLiked) {
-    const blog = await Blog.findByIdAndUpdate(
-      blogId,
-      {
-        $pull: { likes: loginUserId },
-        isLiked: false,
-      },
-      { new: true }
-    );
-    res.json(blog);
+      if (alreadyDisliked) {
+        blog.dislikes.pull(loginUserId);
+        blog.isDisliked = false;
+      }
+
+      if (isLiked) {
+        blog.likes.pull(loginUserId);
+        blog.isLiked = false;
+      } else {
+        blog.likes.push(loginUserId);
+        blog.isLiked = true;
+      }
+
+      const result = await performOperation(blog.save.bind(blog));
+      res.status(StatusCodes.OK).json({ result });
+    } catch (error) {
+      console.error(error);
+      res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: error.message });
+    }
   }
-  if (isDisLiked) {
-    const blog = await Blog.findByIdAndUpdate(
-      blogId,
-      {
-        $pull: { dislikes: loginUserId },
-        isDisliked: false,
-      },
-      { new: true }
-    );
-    res.json(blog);
-  } else {
-    const blog = await Blog.findByIdAndUpdate(
-      blogId,
-      {
-        $push: { dislikes: loginUserId },
-        isDisliked: true,
-      },
-      { new: true }
-    );
-    res.json(blog);
+);
+
+const disliketheBlog = handlePermission(
+  "Blog",
+  "dislike",
+  null,
+  async (req, res, next) => {
+    try {
+      const { blogId } = req.body;
+      const blog = await performOperation(Blog.findById.bind(Blog), blogId);
+
+      if (!blog) {
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .json({ error: "Blog not found" });
+      }
+
+      const loginUserId = req?.userId?._id;
+      const isDisliked = blog?.isDisliked;
+      const alreadyLiked = blog?.likes?.find(
+        (userId) => userId?.toString() === loginUserId?.toString()
+      );
+
+      if (alreadyLiked) {
+        blog.likes.pull(loginUserId);
+        blog.isLiked = false;
+      }
+
+      if (isDisliked) {
+        blog.dislikes.pull(loginUserId);
+        blog.isDisliked = false;
+      } else {
+        blog.dislikes.push(loginUserId);
+        blog.isDisliked = true;
+      }
+
+      const result = await performOperation(blog.save.bind(blog));
+      res.status(StatusCodes.OK).json({ result });
+    } catch (error) {
+      console.error(error);
+      res
+        .status(StatusCodes.INTERNAL_SERVER_ERROR)
+        .json({ error: error.message });
+    }
   }
-});
+);
 
 module.exports = {
   createBlog,
   updateBlog,
   getBlog,
-  getAllBlogs,
   deleteBlog,
   liketheBlog,
-  disliketheBlog
-
+  disliketheBlog,
 };
