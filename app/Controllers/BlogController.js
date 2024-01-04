@@ -173,16 +173,35 @@ const updateBlog = handlePermission(
     }
   }
 );
+
 const getBlog = asyncHandler(async (req, res) => {
-  const { Id } = req.query;
+  const { Id, limit, skip } = req.query;
   try {
     let query = {};
+    // Get total number of blogs in the entire collection
+    const totalBlogsQuery = Blog.countDocuments();
+    totalBlogsCount = await performOperation(
+      totalBlogsQuery.exec.bind(totalBlogsQuery)
+    );
 
     if (Id) {
       query = { _id: ObjectId(Id) };
     } else {
-      const blogs = await performOperation(Blog.find.bind(Blog));
-      res.status(StatusCodes.OK).json({ result: blogs });
+      const blogsQuery = Blog.find(query);
+      if (limit) {
+        blogsQuery.limit(parseInt(limit, 10));
+      }
+
+      if (skip) {
+        blogsQuery.skip(parseInt(skip, 10));
+      }
+
+      const blogs = await performOperation(blogsQuery.exec.bind(blogsQuery));
+      // Get total number of blogs in the entire collection
+
+      res
+        .status(StatusCodes.OK)
+        .json({ totalBlogsCount: totalBlogsCount, result: blogs });
     }
     const blog = await performOperation(Blog.find.bind(Blog), query);
 
@@ -192,7 +211,10 @@ const getBlog = asyncHandler(async (req, res) => {
         .json({ error: "Blog not found" });
     }
 
-    res.status(StatusCodes.OK).json({ result: blog });
+    res.status(StatusCodes.OK).json({
+      totalBlogsCount: totalBlogsCount,
+      result: blog,
+    });
   } catch (error) {
     console.error(error);
     res

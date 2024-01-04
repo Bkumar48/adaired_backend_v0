@@ -15,7 +15,6 @@ router.put("/like", authMiddleware, liketheBlog);
 router.put("/dislike", authMiddleware, disliketheBlog);
 router.put("/updateBlog/:id", authMiddleware, updateBlog); //authMiddleware, isAdmin,
 router.delete("/deleteBlog/:id", authMiddleware, deleteBlog);
-router.get("/findBlog", authMiddleware, getBlog);
+router.get("/findBlog", getBlog);
 
 module.exports = router;
-
