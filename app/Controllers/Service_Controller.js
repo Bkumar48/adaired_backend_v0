@@ -76,96 +76,110 @@ const setImageFields = async (req, Service) => {
     "ourProcessImageI",
     "ourProcessImageII",
     "combinedSection",
+    "LastSectionPoints",
     "LastSectionImage",
   ];
 
-  await Promise.all(imageFields.map(async (field) => {
-    if (req.files?.length) {
-      if (field === "combinedSection" && Array.isArray(Service[field])) {
-        // Handle an array of combinedSectionImage objects
-        for (let i = 0; i < Service[field].length; i++) {
-          const combinedImageObj = JSON.parse(JSON.stringify(Service[field][i]));
-          console.log("combinedImageObj", combinedImageObj)
-          const file = req.files.find(
-            (file) => file.fieldname === combinedImageObj.combinedSectionImage
-          );
+  await Promise.all(
+    imageFields.map(async (field) => {
+      if (req.files?.length) {
+        if (field === "combinedSection" && Array.isArray(Service[field])) {
+          // Handle an array of combinedSectionImage objects
+          for (let i = 0; i < Service[field].length; i++) {
+            const combinedImageObj = Service[field][i];
 
-          if (file) {
-            if (combinedImageObj.combinedSectionImage) {
-              await deleteFile(
-                uploadPath + combinedImageObj.combinedSectionImage
+            // Remove keys with empty objects as values
+            const filterCombinedImageObj = Object.fromEntries(
+              Object.entries(combinedImageObj).filter(
+                ([key, value]) => !isEmptyObject(value)
+              )
+            );
+
+            function isEmptyObject(obj) {
+              return (
+                Object.keys(obj).length === 0 && obj.constructor === Object
               );
             }
-            combinedImageObj.combinedSectionImage = file.filename;
-          }
-          Service[field][i] = combinedImageObj;
-        }
-      } else {
-        const file = req.files.find((file) => file.fieldname === field);
 
-        if (file) {
-          if (Service[field]) {
-            await deleteFile(uploadPath + Service[field]);
+            filterCombinedImageObj.combinedSectionImage = "";
+            Service[field][i] = filterCombinedImageObj;
+
+            const file = req.files.find(
+              (file) =>
+                file.fieldname ===
+                "combinedSection[" + [i] + "][combinedSectionImage]"
+            );
+
+            if (file) {
+              if (Service[field][i].combinedSectionImage) {
+                await deleteFile(
+                  uploadPath + Service[field][i].combinedSectionImage
+                );
+              }
+            }
+
+            file
+              ? (Service[field][i].combinedSectionImage = file.filename)
+              : "";
           }
-          Service[field] = file.filename;
+        } else if (
+          field === "LastSectionPoints" &&
+          Array.isArray(Service[field])
+        ) {
+          // Handle an array of LastSectionPoints objects
+          for (let i = 0; i < Service[field].length; i++) {
+            const LastSectionPointsObj = Service[field][i];
+
+            // Remove keys with empty objects as values
+            const filterLastSectionPointsObj = Object.fromEntries(
+              Object.entries(LastSectionPointsObj).filter(
+                ([key, value]) => !isEmptyObject(value)
+              )
+            );
+
+            function isEmptyObject(obj) {
+              return (
+                Object.keys(obj).length === 0 && obj.constructor === Object
+              );
+            }
+
+            filterLastSectionPointsObj.LastSectionPointsImage = "";
+            Service[field][i] = filterLastSectionPointsObj;
+
+            const file = req.files.find(
+              (file) =>
+                file.fieldname === "LastSectionPoints[" + [i] + "][icon]"
+            );
+
+            if (file) {
+              if (Service[field][i].LastSectionPointsImage) {
+                await deleteFile(
+                  uploadPath + Service[field][i].LastSectionPointsImage
+                );
+              }
+            }
+
+            file
+              ? (Service[field][i].LastSectionPointsImage = file.filename)
+              : "";
+          }
+        } else {
+          const file = req.files.find((file) => file.fieldname === field);
+
+          if (file) {
+            if (Service[field]) {
+              await deleteFile(uploadPath + Service[field]);
+            }
+            Service[field] = file.filename;
+          }
         }
       }
-    }
-  }));
+    })
+  );
 
   // Save the modified document
   await Service.save();
 };
-
-
-
-// const setImageFields = async (req, Service) => {
-//   const imageFields = [
-//     "serviceImage",
-//     "ourProcessImageI",
-//     "ourProcessImageII",
-//     "combinedSection",
-//     "LastSectionImage",
-//   ];
-
-//   imageFields.forEach(async (field) => {
-//     if (req.files?.length) {
-//       // console.log("req.files", req.files)
-//       if (field === "combinedSection" && Array.isArray(Service[field])) {
-//         // Handle an array of combinedSectionImage objects
-//         for (let i = 0; i < Service[field].length; i++) {
-//           console.log("Service[field][i]", Service[field])
-//           const combinedImageObj = Service[field][i];
-//           const file = req.files.find(
-//             (file) => file.fieldname === combinedImageObj.combinedSectionImage
-//           );
-
-//           if (file) {
-//             if (combinedImageObj.combinedSectionImage) {
-//               await deleteFile(
-//                 uploadPath + combinedImageObj.combinedSectionImage
-//               );
-//             }
-//             combinedImageObj.combinedSectionImage = file.filename;
-//           }
-//           Service[field][i] = combinedImageObj;
-//         }
-//       } else {
-//         const file = req.files.find((file) => file.fieldname === field);
-
-//         if (file) {
-//           if (Service[field]) {
-//             await deleteFile(uploadPath + Service[field]);
-//           }
-//           Service[field] = file.filename;
-//         }
-//       }
-//     }
-//   });
-
-//   // Save the modified document
-//   await Service.save();
-// };
 
 /**
  * Delete a file from the file system.

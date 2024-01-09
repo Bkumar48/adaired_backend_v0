@@ -21,6 +21,10 @@ const ServiceSchema = new mongoose.Schema(
     serviceBanner: defaultString,
     serviceTitle: { ...defaultString, required: true },
     serviceDescription: defaultString,
+    mainTwoPoints: {
+      type: [{}],
+      default: [{}],
+    },
     serviceImage: defaultString,
     serviceDescriptionII: defaultString,
     serviceHeadingII: defaultString,
@@ -36,7 +40,13 @@ const ServiceSchema = new mongoose.Schema(
     serviceHeadingIII: defaultString,
     serviceDescriptionIV: defaultString,
     serviceNote: defaultString,
+    LastSectionHeading: defaultString,
     LastSectionText: defaultString,
+    LastSectionPoints:{
+      type: [{}],
+      default: [{}],
+    },
+    LastSectionHookLine: defaultString,
     LastSectionImage: defaultString,
   },
   { timestamps: true }
