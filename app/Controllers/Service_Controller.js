@@ -3,7 +3,7 @@ const Service = require("../Models/Service_Model");
 const { ObjectId } = require("mongoose").Types;
 const asyncHandler = require("express-async-handler");
 const { ServiceImg } = require("../Middleware/fileUpload");
-const uploadPath = process.env.UPLOAD_SERVICE || "public/images/Services/";
+const uploadPath = process.env.UPLOAD_SERVICE;
 const fs = require("fs").promises;
 
 /**
