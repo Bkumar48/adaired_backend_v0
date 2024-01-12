@@ -87,8 +87,8 @@ app.use("/nodeapi/api/v1/users/roles",userRoleRoute)
 // Define blog in user/ admin access
 // app.use("/nodeapi/api/v1/user/blogcate",blogCateRoute)
 
-// Define blog in user/admin access
-app.use("/nodeapi/api/v1/user/blog",blogRoute)
+
+
 
 // Define coupon in user/admin access
 app.use("/nodeapi/api/v1/admin/coupon",couponRoute) 
@@ -117,6 +117,8 @@ app.use("/nodeapi/api/v1/admin/services", ServiceRouter);
 // Use the BlogCategory router
 app.use("/nodeapi/api/v1/admin/blogcategory", blogCategoryRouter);
 
+// Blogs and Blog Categories
+app.use("/nodeapi/api/v1/blog",blogRoute)
 
 
 // defualt route to test the api
