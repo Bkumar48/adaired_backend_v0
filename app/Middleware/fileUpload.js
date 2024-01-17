@@ -197,7 +197,7 @@ const config = {
   UPLOAD_FAQ: process.env.UPLOAD_FAQ || "upload/faq/",
   UPLOAD_BLOG: process.env.UPLOAD_BLOG || "upload/blog/",
   UPLOAD_TESTIMONIAL: process.env.UPLOAD_TESTIMONIAL || "upload/testimonial/",
-  UPLOAD_SERVICE: "public/images/Services/", 
+  UPLOAD_SERVICE: "upload/services/", 
   FILE_UPLOAD_SIZE: process.env.FILE_UPLOAD_SIZE || 10000000000000,
   // ... other configuration values
 };

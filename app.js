@@ -112,7 +112,7 @@ app.use("/nodeapi/api/vi/admin/testimonial",testimonialRoute)
 app.use("/nodeapi/api/v1/admin/pricerules",priceRuleRoute)
 
 // Use the MainService router
-app.use("/nodeapi/api/v1/admin/services", ServiceRouter);
+app.use("/nodeapi/api/v1/services", ServiceRouter);
 
 // Use the BlogCategory router
 app.use("/nodeapi/api/v1/admin/blogcategory", blogCategoryRouter);

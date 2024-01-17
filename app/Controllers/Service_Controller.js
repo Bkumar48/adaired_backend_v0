@@ -5,6 +5,7 @@ const asyncHandler = require("express-async-handler");
 const { ServiceImg } = require("../Middleware/fileUpload");
 const uploadPath = process.env.UPLOAD_SERVICE;
 const fs = require("fs").promises;
+const slugify = require("slugify");
 
 /**
  * Check if the user has permission to perform a specific action on an entity.
@@ -202,6 +203,7 @@ const deleteFile = async (filePath) => {
  * @param {Object} res - Express response object.
  * @returns {Object} - Created service.
  */
+
 const createNewService = handlePermission(
   "Service",
   "create",
@@ -211,12 +213,16 @@ const createNewService = handlePermission(
       const parentId = req.body.parentId;
       const isChildService = req.body.isChildService;
 
-      const service = await performOperation(
+      // Slugify the provided slug (assuming it's in req.body.slug)
+      req.body.slug = slugify(req.body.slug, { lower: true });
+
+      // Create the new service
+      const createdService = await performOperation(
         Service.create.bind(Service),
         req.body
       );
 
-      await setImageFields(req, service);
+      await setImageFields(req, createdService);
 
       if (isChildService && parentId) {
         // If it's a child service, set the parent's title as the serviceBanner
@@ -227,25 +233,16 @@ const createNewService = handlePermission(
           throw new Error("Parent does not exist.");
         }
 
-        service.serviceBanner = parentService.serviceTitle;
-      }
+        createdService.serviceBanner = parentService.serviceBanner;
 
-      await service.save();
-
-      if (parentId) {
-        // If parentId exists, update the parent's children array
-        const parentService = await Service.findById(parentId);
-
-        if (!parentService) {
-          // If parent does not exist, throw an error and remove the created service
-          throw new Error("Parent does not exist.");
-        }
-
-        parentService.childrens.push(service._id);
+        // Update the parent's children array with the new service ID
+        parentService.childrens.push(createdService.slug);
         await parentService.save();
       }
 
-      return service;
+      await createdService.save();
+
+      return createdService;
     } catch (error) {
       console.log("Error in createNewService:", error);
 
@@ -258,34 +255,64 @@ const createNewService = handlePermission(
 );
 
 /**
- * Retrieve services based on query parameters.
+ * Retrieve services based on route parameters.
  *
  * @param {Object} req - Express request object.
  * @param {Object} res - Express response object.
  * @returns {void}
  */
 const getServices = asyncHandler(async (req, res) => {
-  const { parentId, childId, allParent, allChild, Id } = req.query;
+  const { id, slug, parentSlug } = req.params;
+  const { allParent, allChild } = req.query;
 
   try {
     let query = {};
 
-    if (allParent) {
+    if (slug) {
+      // Find a service by slug
+      query = { slug: slug };
+    } else if (parentSlug && slug) {
+      // Find a child service by parent and child slugs
+      const parentService = await performOperation(
+        Service.findOne.bind(Service),
+        { slug: parentSlug, isChildService: false }
+      );
+
+      if (parentService) {
+        query = {
+          parentId: parentService._id,
+          slug: slug,
+          isChildService: true,
+        };
+      } else {
+        return res.status(404).json({ error: "Parent Service not found" });
+      }
+    } else if (id) {
+      console.log("Service ID:", id);
+      console.log("Type of Service ID:", typeof id);
+
+      // Check if id is a valid ObjectId
+      try {
+        const objectId = ObjectId(id);
+        console.log("Converted ObjectId:", objectId);
+      } catch (objectIdError) {
+        console.error("Error converting to ObjectId:", objectIdError);
+        return res.status(400).json({ error: "Invalid ID format" });
+      }
+
+      // Find a service by ID
+      query = { _id: ObjectId(id) };
+    } else if (allParent) {
       // Find all parent services
       query = { isChildService: false };
     } else if (allChild) {
       // Find all child services
       query = { isChildService: true };
-    } else if (parentId && childId) {
-      // Find services with a specific parent and child
-      query = { parentId, _id: ObjectId(childId) };
-      // query = { _id: { $in: [ObjectId(parentId), ObjectId(childId)] } };
-    } else if (Id) {
-      // Find a service by ID
-      query = { _id: ObjectId(Id) };
     } else {
+      query = {};
+      // Fetch all services if no specific parameters are provided
       const Services = await performOperation(Service.find.bind(Service));
-      res.status(200).json({
+      return res.status(200).json({
         data: Services,
       });
     }

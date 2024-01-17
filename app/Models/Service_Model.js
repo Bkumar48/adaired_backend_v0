@@ -11,15 +11,10 @@ const ServiceSchema = new mongoose.Schema(
       ref: "Services",
       default: null,
     },
-    childrens: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Service",
-        default: [],
-      },
-    ],
+    childrens: { type: [String], default: [] },
     serviceBanner: defaultString,
     serviceTitle: { ...defaultString, required: true },
+    slug: { ...defaultString, unique: true },
     serviceDescription: defaultString,
     mainTwoPoints: {
       type: [{}],
@@ -42,7 +37,7 @@ const ServiceSchema = new mongoose.Schema(
     serviceNote: defaultString,
     LastSectionHeading: defaultString,
     LastSectionText: defaultString,
-    LastSectionPoints:{
+    LastSectionPoints: {
       type: [{}],
       default: [{}],
     },
