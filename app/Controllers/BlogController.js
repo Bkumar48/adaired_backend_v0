@@ -176,6 +176,7 @@ const updateBlog = handlePermission(
 
 const getBlog = asyncHandler(async (req, res) => {
   const { Id, limit, skip } = req.query;
+  const { slug } = req.params;
   try {
     let query = {};
     // Get total number of blogs in the entire collection
@@ -186,6 +187,8 @@ const getBlog = asyncHandler(async (req, res) => {
 
     if (Id) {
       query = { _id: ObjectId(Id) };
+    } else if (slug) {
+      query = { slug: slug };
     } else {
       const blogsQuery = Blog.find(query);
       if (limit) {
