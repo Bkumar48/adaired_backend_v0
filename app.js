@@ -29,7 +29,7 @@ const frontRoute = require("./app/Routers/FrontRouter");
 const ServiceRouter = require("./app/Routers/Services_Routes");
 
 const caseStudiesCategoryRoute = require("./app/Routers/CaseStudiesCategories_Routes");
-const caseStudiesRoute = require("./app/Routers/CaseStudy_Routes");
+const caseStudiesRoute = require("./app/Routers/CaseStudies_Routes");
 
 const blogCategoryRouter = require("./app/Routers/BlogCategoryRoutes");
 

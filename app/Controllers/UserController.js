@@ -755,6 +755,7 @@ const loginUserCtrl = asyncHandler(async (req, res) => {
   const { email, password } = req.body;
   try {
     if (!email || !password) {
+      console.log(email, password)
       throw createError(
         StatusCodes.BAD_REQUEST,
         "All the fields are required!"

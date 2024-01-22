@@ -26,3 +26,4 @@ const CaseStudiesCategories = mongoose.model(
 );
 
 module.exports = CaseStudiesCategories;
+ 

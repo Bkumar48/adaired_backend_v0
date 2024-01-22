@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { authMiddleware } = require("../Middleware/authMiddleware");
-const CaseStudy_Controller = require("../Controllers/CaseStudy_Controller");
+const CaseStudy_Controller = require("../Controllers/CaseStudies_Controller");
 
 router.post(
   "/createCaseStudy",
@@ -9,4 +9,4 @@ router.post(
   CaseStudy_Controller.createCaseStudy
 );
 
-module.exports = router;
+module.exports = router; 

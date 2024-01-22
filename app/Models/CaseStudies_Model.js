@@ -1,20 +1,5 @@
 const mongoose = require("mongoose");
 
-const goalSchema = new mongoose.Schema({
-  title: String,
-  description: String,
-});
-
-const strategySchema = new mongoose.Schema({
-  title: String,
-  description: String,
-});
-
-const technologySchema = new mongoose.Schema({
-  image: String,
-  name: String,
-});
-
 const growthBoxSchema = new mongoose.Schema({
   percentage: String,
   description: String,
@@ -30,8 +15,7 @@ const resultBoxSchema = new mongoose.Schema({
 const caseStudiesSchema = new mongoose.Schema(
   {
     category: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "CaseStudiesCategory",
+      type: String,
       index: true,
     },
     slug: String,
@@ -40,24 +24,36 @@ const caseStudiesSchema = new mongoose.Schema(
     caseStudyDescription: String,
     caseStudyImage: String,
     aboutProjectDescription: String,
-    challengesDescription: String,
-    challenges: [String],
     challengesImage: String,
-    solutionsDescription: String,
-    solutions: [goalSchema],
+    challengesDescription: String,
     solutionsImage: String,
+    solutionsDescription: String,
+    challengesAndSolutions: {
+      type: [{}],
+      default: [{}],
+    },
     technologiesUsedTitle: String,
     technologiesUsedDescription: String,
     technologiesUsed: [
       {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "CaseStudiesCategories",
+        icon: String,
+        title: String,
       },
     ],
     goalsTitle: String,
     goalsDescription: String,
-    objectives: [goalSchema],
-    stratergy: [strategySchema],
+    objectives: [
+      {
+        title: String,
+        content: String,
+      },
+    ],
+    stratergy: [
+      {
+        title: String,
+        content: String,
+      },
+    ],
     goalImage: String,
     growthBox: [growthBoxSchema],
     resultDescription: String,

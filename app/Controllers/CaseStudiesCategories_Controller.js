@@ -11,7 +11,7 @@ const checkPermission = (userInfo, entity, action) =>
   userInfo?.roleType === "admin" ||
   userInfo?.role?.[0]?.permissions?.[0]?.[entity]?.[action];
 
-const handlePermission = (entity, action, uploadMiddleware, operation) =>
+const handlePermission = (entity, action, uploadMiddleware, operation) => 
   asyncHandler(async (req, res, next) => {
     const { userId } = req;
 

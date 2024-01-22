@@ -1,4 +1,4 @@
-const CaseStudy = require("../Models/CaseStudy_Model");
+const CaseStudy = require("../Models/CaseStudies_Model");
 const { ObjectId } = require("mongoose").Types;
 const asyncHandler = require("express-async-handler");
 const { caseStudyImg } = require("../Middleware/fileUpload");
@@ -40,37 +40,32 @@ const performOperation = async (modelMethod, ...args) => modelMethod(...args);
 
 const setImageFields = async (req, CaseStudy) => {
   const imageFields = [
-    caseStudyImage,
-    challengesImage,
-    solutionsImage,
-    goalImage,
-    resultBox,
+    "caseStudyImage",
+    "challengesImage",
+    "solutionsImage",
+    "goalImage",
+    "resultBox",
   ];
 
   await Promise.all(
     imageFields.map(async (field) => {
       if (req.files?.length) {
-        if (field === "caseStudyImage") {
-          CaseStudy[field] = `${uploadPath}${req.files[0].filename}`;
+        const file = req.files.find((file) => file.fieldname === field);
+        if (file) {
+          if(field === "resultBox"){
+            const resultBox = req.files.map((file, index) => ({
+              image: `${uploadPath}${file.filename}`,
+              title: req.body.resultBox[index].title,
+              percentage: req.body.resultBox[index].percentage,
+              description: req.body.resultBox[index].description,
+            }));
+            CaseStudy[field] = resultBox;
+          }
+          else{
+            CaseStudy[field] = `${uploadPath}${file.filename}`;
+          }
         }
-        if (field === "challengesImage") {
-          CaseStudy[field] = `${uploadPath}${req.files[1].filename}`;
-        }
-        if (field === "solutionsImage") {
-          CaseStudy[field] = `${uploadPath}${req.files[2].filename}`;
-        }
-        if (field === "goalImage") {
-          CaseStudy[field] = `${uploadPath}${req.files[3].filename}`;
-        }
-        if (field === "resultBox") {
-          const resultBox = req.files.map((file, index) => ({
-            image: `${uploadPath}${file.filename}`,
-            title: req.body.resultBox[index].title,
-            percentage: req.body.resultBox[index].percentage,
-            description: req.body.resultBox[index].description,
-          }));
-          CaseStudy[field] = resultBox;
-        }
+        
       }
     })
   );
@@ -98,18 +93,18 @@ const createCaseStudy = handlePermission(
     const { caseStudyName } = req.body;
     req.body.slug = slugify(req.body.slug || caseStudyName, { lower: true });
 
-    const CaseStudy = await performOperation(
+    const caseStudy = await performOperation(
       CaseStudy.create.bind(CaseStudy),
       req.body
     );
 
-    await setImageFields(req, CaseStudy);
+    await setImageFields(req, caseStudy);
 
-    await CaseStudy.save();
-    return CaseStudy;
+    await caseStudy.save();
+    return caseStudy;
   }
 );
 
 module.exports = {
   createCaseStudy,
-}; 
+};
