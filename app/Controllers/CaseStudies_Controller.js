@@ -5,6 +5,7 @@ const { caseStudyImg } = require("../Middleware/fileUpload");
 const uploadPath = process.env.UPLOAD_CASE_STUDY;
 const slugify = require("slugify");
 const fs = require("fs").promises;
+const { StatusCodes } = require("http-status-codes");
 
 const checkPermission = (userInfo, entity, action) =>
   userInfo?.roleType === "admin" ||
@@ -50,22 +51,38 @@ const setImageFields = async (req, CaseStudy) => {
   await Promise.all(
     imageFields.map(async (field) => {
       if (req.files?.length) {
-        const file = req.files.find((file) => file.fieldname === field);
-        if (file) {
-          if(field === "resultBox"){
-            const resultBox = req.files.map((file, index) => ({
-              image: `${uploadPath}${file.filename}`,
-              title: req.body.resultBox[index].title,
-              percentage: req.body.resultBox[index].percentage,
-              description: req.body.resultBox[index].description,
-            }));
-            CaseStudy[field] = resultBox;
+        if (field === "resultBox") {
+          for (let i = 0; i < CaseStudy[field].length; i++) {
+            const resultbox = CaseStudy[field][i];
+
+            // Remove Keys with empty objects as values
+            const filterLastSectionPointsObj = Object.fromEntries(
+              Object.entries(resultbox).filter(
+                ([key, value]) => !isEmptyObject(value)
+              )
+            );
+
+            function isEmptyObject(obj) {
+              return (
+                Object.keys(obj).length === 0 && obj.constructor === Object
+              );
+            }
+
+            filterLastSectionPointsObj.icon = "";
+            CaseStudy[field][i] = filterLastSectionPointsObj;
+
+            const file = req.files.find(
+              (file) => file.fieldname === `resultBox[` + i + `][image]`
+            );
+
+            if (file) {
+              CaseStudy[field][i].icon = `${uploadPath}${file.filename}`;
+            }
           }
-          else{
-            CaseStudy[field] = `${uploadPath}${file.filename}`;
-          }
+        } else {
+          const file = req.files.find((file) => file.fieldname === field);
+          if (file) CaseStudy[field] = `${uploadPath}${file.filename}`;
         }
-        
       }
     })
   );
@@ -83,6 +100,32 @@ const deletePreviousImages = async (previousImages) => {
   } catch (error) {
     console.error(error);
   }
+};
+
+// Function to get the previous images from the caseStudy object
+const getPreviousImages = (caseStudy) => {
+  const previousImages = [];
+  const imageFields = [
+    "caseStudyImage",
+    "challengesImage",
+    "solutionsImage",
+    "goalImage",
+    "resultBox",
+  ];
+
+  imageFields.forEach((field) => {
+    if (Array.isArray(caseStudy[field])) {
+      caseStudy[field].forEach((resultbox) => {
+        if (resultbox.icon) {
+          previousImages.push(resultbox.icon);
+        }
+      });
+    } else if (caseStudy[field]) {
+      previousImages.push(caseStudy[field]);
+    }
+  });
+
+  return previousImages;
 };
 
 const createCaseStudy = handlePermission(
@@ -105,6 +148,106 @@ const createCaseStudy = handlePermission(
   }
 );
 
+const updateCaseStudy = handlePermission(
+  "caseStudy",
+  "update",
+  caseStudyImg,
+  async (req, res) => {
+    const { name } = req.body;
+    req.body.slug = slugify(req.body.slug || name, { lower: true });
+
+    const caseStudy = await performOperation(
+      CaseStudy.findOne.bind(CaseStudy),
+      { slug: req.params.slug }
+    );
+
+    if (!caseStudy) {
+      return null;
+    }
+
+    // Check if new images are uploaded
+    const newImagesUploaded = req.files && req.files.length > 0;
+
+    // Get the previous images before updating
+    const previousImages = getPreviousImages(caseStudy);
+
+    // Update caseStudy fields with new values
+    Object.assign(caseStudy, req.body);
+
+    // If new images are uploaded, update image fields and delete previous images
+    if (newImagesUploaded) {
+      await setImageFields(req, caseStudy);
+      await deletePreviousImages(previousImages);
+    }
+
+    // Save the updated case study
+    await caseStudy.save();
+    return caseStudy;
+  }
+);
+
+const getCaseStudy = async (req, res) => {
+  const { slug } = req.params;
+  try {
+    if (slug === "all") {
+      const categories = await CaseStudy.find();
+      return res.status(StatusCodes.OK).json({ result: categories });
+    }
+
+    const caseStudy = await CaseStudy.findOne({ slug });
+
+    if (!caseStudy) {
+      return res
+        .status(404)
+        .json({ error: "Case study with this slug not found" });
+    }
+
+    return res.status(200).json({ result: caseStudy });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+const deleteCaseStudy = handlePermission(
+  "caseStudy",
+  "delete",
+  caseStudyImg, // Assuming you want to use the same upload middleware for deletion
+  async (req, res) => {
+    const { slug } = req.params;
+
+    const caseStudy = await performOperation(
+      CaseStudy.findOne.bind(CaseStudy),
+      { slug }
+    );
+
+    if (!caseStudy) {
+      return res
+        .status(404)
+        .json({ error: "Case study with this slug not found" });
+    }
+
+    // Get the previous images before deleting
+    const previousImages = getPreviousImages(caseStudy);
+
+    try {
+      // Delete the case study document
+      await caseStudy.remove();
+
+      // Delete the associated images
+      await deletePreviousImages(previousImages);
+
+      return res.status(200).json({ result: "Case study deleted successfully" });
+    } catch (error) {
+      console.error(error);
+      return res.status(500).json({ error: error.message });
+    }
+  }
+);
+
 module.exports = {
   createCaseStudy,
+  getCaseStudy,
+  updateCaseStudy,
+  deleteCaseStudy
 };

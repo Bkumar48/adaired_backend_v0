@@ -1,23 +1,12 @@
 const mongoose = require("mongoose");
 
-const growthBoxSchema = new mongoose.Schema({
-  percentage: String,
-  description: String,
-});
-
-const resultBoxSchema = new mongoose.Schema({
-  image: String,
-  title: String,
-  percentage: String,
-  description: String,
-});
-
 const caseStudiesSchema = new mongoose.Schema(
   {
     category: {
       type: String,
       index: true,
     },
+    colorScheme: String,
     slug: String,
     subHeading: String,
     caseStudyName: String,
@@ -34,12 +23,10 @@ const caseStudiesSchema = new mongoose.Schema(
     },
     technologiesUsedTitle: String,
     technologiesUsedDescription: String,
-    technologiesUsed: [
-      {
-        icon: String,
-        title: String,
-      },
-    ],
+    technologiesUsed: {
+      type: [{}],
+      default: [{}],
+    },
     goalsTitle: String,
     goalsDescription: String,
     objectives: [
@@ -55,9 +42,17 @@ const caseStudiesSchema = new mongoose.Schema(
       },
     ],
     goalImage: String,
-    growthBox: [growthBoxSchema],
+    growthBox: [
+      {
+        title: String,
+        content: String,
+      },
+    ],
     resultDescription: String,
-    resultBox: [resultBoxSchema],
+    resultBox: {
+      type: [{}],
+      default: [{}],
+    },
     resultFinalDescription: String,
   },
   {

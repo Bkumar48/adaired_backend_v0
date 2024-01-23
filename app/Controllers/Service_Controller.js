@@ -62,6 +62,7 @@ const handlePermission = (entity, action, uploadMiddleware, operation) =>
  * @returns {any} - Result of the executed model method.
  */
 
+const performOperation = async (modelMethod, ...args) => modelMethod(...args);
 /**
  * Set image fields in the Service document based on uploaded files.
  *
@@ -315,7 +316,6 @@ const getServices = asyncHandler(async (req, res) => {
         data: Services,
       });
     }
-
     const Services = await performOperation(Service.find.bind(Service), query);
 
     Services.length === 0
