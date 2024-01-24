@@ -79,6 +79,7 @@ const setImageFields = async (req, Service) => {
     "combinedSection",
     "LastSectionPoints",
     "LastSectionImage",
+    "mainTwoPoints",
   ];
 
   await Promise.all(
@@ -163,6 +164,41 @@ const setImageFields = async (req, Service) => {
             file
               ? (Service[field][i].LastSectionPointsImage = file.filename)
               : "";
+          }
+        } else if (field === "mainTwoPoints" && Array.isArray(Service[field])) {
+          // Handle an array of mainTwoPoints objects
+          for (let i = 0; i < Service[field].length; i++) {
+            const mainTwoPointsObj = Service[field][i];
+
+            // Remove keys with empty objects as values
+            const filtermainTwoPointsObj = Object.fromEntries(
+              Object.entries(mainTwoPointsObj).filter(
+                ([key, value]) => !isEmptyObject(value)
+              )
+            );
+
+            function isEmptyObject(obj) {
+              return (
+                Object.keys(obj).length === 0 && obj.constructor === Object
+              );
+            }
+
+            filtermainTwoPointsObj.mainTwoPointsImage = "";
+            Service[field][i] = filtermainTwoPointsObj;
+
+            const file = req.files.find(
+              (file) => file.fieldname === "mainTwoPoints[" + [i] + "][image]"
+            );
+
+            if (file) {
+              if (Service[field][i].mainTwoPointsImage) {
+                await deleteFile(
+                  uploadPath + Service[field][i].mainTwoPointsImage
+                );
+              }
+            }
+
+            file ? (Service[field][i].mainTwoPointsImage = file.filename) : "";
           }
         } else {
           const file = req.files.find((file) => file.fieldname === field);

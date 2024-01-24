@@ -15,3 +15,4 @@ router.delete("/:serviceId", authMiddleware, ServiceController.deleteService);
 router.post("/", authMiddleware, ServiceController.createNewService);
 
 module.exports = router;
+ 

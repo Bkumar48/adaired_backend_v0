@@ -26,7 +26,7 @@ const ServiceSchema = new mongoose.Schema(
     serviceDescriptionIII: defaultString,
     fourPoints: { type: [String], default: [] },
     ourProcessSubHeading: defaultString,
-    ourProcessImageI: defaultString,
+    ourProcessImageI: defaultString, 
     ourProcessImageII: defaultString,
     combinedSection: {
       type: [{}],
@@ -35,6 +35,7 @@ const ServiceSchema = new mongoose.Schema(
     serviceHeadingIII: defaultString,
     serviceDescriptionIV: defaultString,
     serviceNote: defaultString,
+    LastSectionSubHeading: defaultString,
     LastSectionHeading: defaultString,
     LastSectionText: defaultString,
     LastSectionPoints: {
