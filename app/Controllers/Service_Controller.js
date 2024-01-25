@@ -444,6 +444,7 @@ const deleteService = handlePermission(
         "leftImage",
         "rightImage",
         "LastSectionImage",
+        "mainTwoPoints",
       ];
 
       const deleteImagePromises = imageFields.map(async (field) => {
