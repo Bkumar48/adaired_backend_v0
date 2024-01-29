@@ -7,6 +7,7 @@ const caseStudiesSchema = new mongoose.Schema(
       index: true,
     },
     colorScheme: String,
+    cardImage: String,
     slug: String,
     subHeading: String,
     caseStudyName: String,

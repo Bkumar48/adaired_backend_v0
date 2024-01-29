@@ -41,6 +41,7 @@ const performOperation = async (modelMethod, ...args) => modelMethod(...args);
 
 const setImageFields = async (req, CaseStudy) => {
   const imageFields = [
+    "cardImage",
     "caseStudyImage",
     "challengesImage",
     "solutionsImage",
@@ -106,6 +107,7 @@ const deletePreviousImages = async (previousImages) => {
 const getPreviousImages = (caseStudy) => {
   const previousImages = [];
   const imageFields = [
+    "cardImage",
     "caseStudyImage",
     "challengesImage",
     "solutionsImage",
@@ -188,13 +190,28 @@ const updateCaseStudy = handlePermission(
 
 const getCaseStudy = async (req, res) => {
   const { slug } = req.params;
+  const { category } = req.query;
+
   try {
     if (slug === "all") {
-      const categories = await CaseStudy.find();
-      return res.status(StatusCodes.OK).json({ result: categories });
+      // Check if a category is specified in the query
+      if (category) {
+        const caseStudies = await CaseStudy.find({ category: category });
+        return res.status(StatusCodes.OK).json({ result: caseStudies });
+      } else {
+        const caseStudies = await CaseStudy.find();
+        return res.status(StatusCodes.OK).json({ result: caseStudies });
+      }
     }
 
-    const caseStudy = await CaseStudy.findOne({ slug });
+    const query = { slug };
+
+    // If a category is specified in the query, add it to the query
+    if (category) {
+      query.categories = category;
+    }
+
+    const caseStudy = await CaseStudy.findOne(query);
 
     if (!caseStudy) {
       return res
@@ -237,7 +254,9 @@ const deleteCaseStudy = handlePermission(
       // Delete the associated images
       await deletePreviousImages(previousImages);
 
-      return res.status(200).json({ result: "Case study deleted successfully" });
+      return res
+        .status(200)
+        .json({ result: "Case study deleted successfully" });
     } catch (error) {
       console.error(error);
       return res.status(500).json({ error: error.message });
@@ -249,5 +268,5 @@ module.exports = {
   createCaseStudy,
   getCaseStudy,
   updateCaseStudy,
-  deleteCaseStudy
+  deleteCaseStudy,
 };

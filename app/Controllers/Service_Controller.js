@@ -242,7 +242,7 @@ const deleteFile = async (filePath) => {
 
 const createNewService = handlePermission(
   "Service",
-  "create",
+  "create", 
   ServiceImg,
   async (req, res) => {
     try {
@@ -270,6 +270,8 @@ const createNewService = handlePermission(
         }
 
         createdService.serviceBanner = parentService.serviceBanner;
+
+        console.log(createdService.slug)
 
         // Update the parent's children array with the new service ID
         parentService.childrens.push(createdService.slug);
