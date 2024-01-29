@@ -27,6 +27,7 @@ const testimonialRoute = require("./app/Routers/TestimonialRoute");
 const priceRuleRoute = require("./app/Routers/PriceRulesRoute");
 const frontRoute = require("./app/Routers/FrontRouter");
 const ServiceRouter = require("./app/Routers/Services_Routes");
+const CareerRouter = require("./app/Routers/Carrer_Routes");
 
 const caseStudiesCategoryRoute = require("./app/Routers/CaseStudiesCategories_Routes");
 const caseStudiesRoute = require("./app/Routers/CaseStudies_Routes");
@@ -63,70 +64,73 @@ app.use(function (req, res, next) {
 // Define admin route
 //app.use("/nodeapi/api/v1/admin",adminRoute);
 
-app.use("/nodeapi/api/v1/", frontRoute);
+app.use("/webapp/api/v1/", frontRoute);
 
 // Define product route
-app.use("/nodeapi/api/v1/product", productRoute);
+app.use("/webapp/api/v1/product", productRoute);
 
 // Define Page route
-app.use("/nodeapi/api/v1/pages", pageRoute);
+app.use("/webapp/api/v1/pages", pageRoute);
 
 // Define FQA route
-app.use("/nodeapi/api/v1/faq", faqRoute);
+app.use("/webapp/api/v1/faq", faqRoute);
 
 // Define Customer route
-app.use("/nodeapi/api/v1/customer", customerRoute);
+app.use("/webapp/api/v1/customer", customerRoute);
 
 // Define User Ticket route
-app.use("/nodeapi/api/v1/ticket", ticketRoute);
+app.use("/webapp/api/v1/ticket", ticketRoute);
 
 // Define user route
-app.use("/nodeapi/api/v1/user", userRoute);
+app.use("/webapp/api/v1/user", userRoute);
 
 // Define user role route
-app.use("/nodeapi/api/v1/users/roles", userRoleRoute);
+app.use("/webapp/api/v1/users/roles", userRoleRoute);
 
 // Define blog in user/ admin access
 // app.use("/nodeapi/api/v1/user/blogcate",blogCateRoute)
 
 // Define coupon in user/admin access
-app.use("/nodeapi/api/v1/admin/coupon", couponRoute);
+app.use("/webapp/api/v1/admin/coupon", couponRoute);
 
 // Define cart
-app.use("/nodeapi/api/v1/cart", cartRoute);
+app.use("/webapp/api/v1/cart", cartRoute);
 
 // Define Order
-app.use("/nodeapi/api/v1/order", orderRoute);
+app.use("/webapp/api/v1/order", orderRoute);
 
 // Define user Order route
-app.use("/nodeapi/api/v1/user/order", userOrderRoute);
+app.use("/webapp/api/v1/user/order", userOrderRoute);
 
 // Define admin order route
-app.use("/nodeapi/api/v1/admin/order", adminOrderRoute);
+app.use("/webapp/api/v1/admin/order", adminOrderRoute);
 
 // Define testimonial route
-app.use("/nodeapi/api/vi/admin/testimonial", testimonialRoute);
+app.use("/webapp/api/vi/admin/testimonial", testimonialRoute);
 
 // Define Price and Rules
-app.use("/nodeapi/api/v1/admin/pricerules", priceRuleRoute);
+app.use("/webapp/api/v1/admin/pricerules", priceRuleRoute);
 
 // Use the MainService router
-app.use("/nodeapi/api/v1/services", ServiceRouter);
+app.use("/webapp/api/v1/services", ServiceRouter);
 
 // Use the BlogCategory router
-app.use("/nodeapi/api/v1/admin/blogcategory", blogCategoryRouter);
+app.use("/webapp/api/v1/admin/blogcategory", blogCategoryRouter);
 
 // Blogs and Blog Categories
-app.use("/nodeapi/api/v1/blog", blogRoute);
+app.use("/webapp/api/v1/blog", blogRoute);
 
 // Define Case Studies Category route
-app.use("/nodeapi/api/v1/case-studies-category", caseStudiesCategoryRoute);
+app.use("/webapp/api/v1/case-studies-category", caseStudiesCategoryRoute);
 
 // Define Case Studies route
-app.use("/nodeapi/api/v1/case-studies", caseStudiesRoute);
+app.use("/webapp/api/v1/case-studies", caseStudiesRoute);
+
+// Define Career route
+app.use("/webapp/api/v1/career", CareerRouter);
 
 // defualt route to test the api
-app.get("/nodeapi", (req, res, next) => {
+app.get("/webapp", (req, res, next) => {
   res.json({ massage: "App is working! :)" });
 });
 

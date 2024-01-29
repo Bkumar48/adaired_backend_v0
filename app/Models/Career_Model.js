@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const careerSchema = new mongoose.Schema(
   {
-    jobName: String,
+    jobName: { type: String, required: true },
     jobDescription: String,
     experienceRequired: String,
     openings: Number,
@@ -14,6 +14,7 @@ const careerSchema = new mongoose.Schema(
     strict: "throw",
   }
 );
+
 careerSchema.index({ jobName: 1 });
 
 const Career = mongoose.model("Career", careerSchema);

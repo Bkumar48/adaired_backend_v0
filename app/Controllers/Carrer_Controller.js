@@ -1,4 +1,4 @@
-const Career = require("../Models/Career_Model.jsx");
+const Career = require("../Models/Career_Model.js");
 const { StatusCodes } = require("http-status-codes");
 const asyncHandler = require("express-async-handler");
 
@@ -29,24 +29,95 @@ const handlePermission = (entity, action, operation) =>
 const performOperation = async (modelMethod, ...args) => modelMethod(...args);
 
 const createJob = handlePermission(
-    "career",
-    "create",
-    async (req, res, next) => {
-        const { jobName, jobDescription, experienceRequired, openings, description } =
-        req.body;
-    
-        const job = await performOperation(Career.create, {
-        jobName,
-        jobDescription,
-        experienceRequired,
-        openings,
-        description,
-        });
-    
-        return job;
-    }
-    );
+  "career",
+  "create",
+  async (req, res, next) => {
+    console.log("req.body", req.body)
+    const job = await performOperation(Career.create.bind(Career), req.body);
 
-    module.exports = {
-        createJob,
-    };
+    return job;
+  }
+);
+
+const updateJob = handlePermission(
+  "career",
+  "update",
+  async (req, res, next) => {
+    const jobId = req.params.id; // Assuming the job ID is in the route parameters
+    const updateData = req.body;
+
+    try {
+      const updatedJob = await Career.findByIdAndUpdate(jobId, updateData, {
+        new: true,
+      });
+      if (!updatedJob) {
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .json({ error: "Job not found" });
+      }
+      return res.status(StatusCodes.OK).json({ result: updatedJob });
+    } catch (error) {
+      console.error(error);
+      return res.status(StatusCodes.BAD_REQUEST).json({ error: error.message });
+    }
+  }
+);
+
+const deleteJob = handlePermission(
+  "career",
+  "delete",
+  async (req, res, next) => {
+    const jobId = req.params.id; // Assuming the job ID is in the route parameters
+
+    try {
+      const deletedJob = await Career.findByIdAndDelete(jobId);
+      if (!deletedJob) {
+        return res
+          .status(StatusCodes.NOT_FOUND)
+          .json({ error: "Job not found" });
+      }
+
+      // Convert the deletedJob to a plain JavaScript object
+      const deletedJobObject = deletedJob.toObject();
+
+      return res.status(StatusCodes.OK).json({
+        result: "Job deleted successfully",
+        deletedJob: deletedJobObject,
+      });
+    } catch (error) {
+      console.error(error);
+      return res.status(StatusCodes.BAD_REQUEST).json({ error: error.message });
+    }
+  }
+);
+
+const findJob = async (req, res, next) => {
+  const jobId = req.params.id;
+
+  try {
+    if (jobId === "all") {
+      const allJobs = await Career.find();
+      return res.status(StatusCodes.OK).json({ result: allJobs });
+    }
+
+    const job = await Career.findById(jobId);
+    if (!job) {
+      return res.status(StatusCodes.NOT_FOUND).json({ error: "Job not found" });
+    }
+    return res.status(StatusCodes.OK).json({ result: job });
+  } catch (error) {
+    console.error(error);
+    return res.status(StatusCodes.BAD_REQUEST).json({ error: error.message });
+  }
+};
+
+module.exports = {
+  findJob,
+};
+
+module.exports = {
+  createJob,
+  updateJob,
+  deleteJob,
+  findJob,
+};
