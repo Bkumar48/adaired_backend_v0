@@ -28,6 +28,7 @@ const priceRuleRoute = require("./app/Routers/PriceRulesRoute");
 const frontRoute = require("./app/Routers/FrontRouter");
 const ServiceRouter = require("./app/Routers/Services_Routes");
 const CareerRouter = require("./app/Routers/Carrer_Routes");
+const CareerFormRouter = require("./app/Routers/CareerFormRoutes");
 
 const caseStudiesCategoryRoute = require("./app/Routers/CaseStudiesCategories_Routes");
 const caseStudiesRoute = require("./app/Routers/CaseStudies_Routes");
@@ -128,6 +129,10 @@ app.use("/webapp/api/v1/case-studies", caseStudiesRoute);
 
 // Define Career route
 app.use("/webapp/api/v1/career", CareerRouter);
+
+// Define Career form
+app.use("/webapp/api/v1/career-form", CareerFormRouter);
+
 
 // defualt route to test the api
 app.get("/webapp", (req, res, next) => {

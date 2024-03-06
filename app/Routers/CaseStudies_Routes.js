@@ -18,6 +18,7 @@ router.put(
 );
 
 // Get Case Study by Slug
+
 router.get("/:slug", CaseStudy_Controller.getCaseStudy);
 
 // Delete Case Study

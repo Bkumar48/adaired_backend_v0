@@ -75,25 +75,44 @@ const deletePreviousImages = async (previousTechnologies) => {
   }
 };
 
+
 const createCaseStudiesCategory = handlePermission(
   "caseStudiesCategory",
   "create",
   caseStudiesCategoryImg,
   async (req, res) => {
-    const { categoryName, technologies } = req.body;
-    req.body.slug = slugify(req.body.slug || categoryName, { lower: true });
+    const { categoryName, childrens } = req.body;
+    let slug = slugify(req.body.slug || categoryName, { lower: true });
 
-    const Category = await performOperation(
-      CaseStudiesCategories.create.bind(CaseStudiesCategories),
-      req.body
-    );
+    // Check if childrens is provided in req.body, otherwise default to an empty array
+    req.body.childrens = childrens || [];
 
+    // Check for duplicate slugs
+    let isDuplicateSlug = await CaseStudiesCategories.exists({ slug: slug });
+    if (isDuplicateSlug) {
+      return res.status(400).json({ error: 'Duplicate slug' });
+    }
+
+    // Create the category
+    const Category = new CaseStudiesCategories({
+      categoryName: categoryName,
+      slug: slug,
+      childrens: req.body.childrens
+    });
+
+    // Set image fields
     await setImageFields(req, Category);
 
-    await Category.save();
-    return Category;
+    try {
+      // Save the category
+      await Category.save();
+      return res.status(200).json({ message: 'Category created successfully', category: Category });
+    } catch (err) {
+      return res.status(500).json({ error: 'Failed to create category', details: err.message });
+    }
   }
 );
+
 
 const updateCaseStudiesCategory = handlePermission(
   "caseStudiesCategory",

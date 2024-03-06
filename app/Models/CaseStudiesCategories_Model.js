@@ -1,11 +1,17 @@
 const mongoose = require("mongoose");
 
+const defaultString = { type: String, default: "" };
+
 const caseStudiesCategoriesSchema = new mongoose.Schema(
   {
-    categoryName: String,
+    categoryName: {
+      ...defaultString,
+      required: true,
+    },
     slug: {
-      type: String,
-      index: true, // Add an index if frequently queried
+      ...defaultString,
+      index: true,
+      unique: true,
     },
     technologies: [
       {
@@ -13,9 +19,10 @@ const caseStudiesCategoriesSchema = new mongoose.Schema(
         title: String,
       },
     ],
+    childrens: { type: [String], default: [] },
   },
   {
-    minimize: false, // Keep empty objects in the document
+    // minimize: false, // Keep empty objects in the document
     timestamps: true, // Add createdAt and updatedAt fields
   }
 );
@@ -26,4 +33,3 @@ const CaseStudiesCategories = mongoose.model(
 );
 
 module.exports = CaseStudiesCategories;
- 

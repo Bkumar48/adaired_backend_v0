@@ -13,7 +13,7 @@ const util = require("util");
  * @constant {Array} allowedFileTypes
  * @description Array of allowed file types for image uploads.
  */
-const allowedFileTypes = ["png", "jpg", "jpeg", "webp", "svg"];
+const allowedFileTypes = ["png", "jpg", "jpeg", "webp", "svg", "pdf"];
 
 /**
  * @constant {Object} config
@@ -29,6 +29,7 @@ const config = {
   UPLOAD_SERVICE: "upload/services/",
   UPLOAD_CASESTUDY_CATEGORY: "upload/caseStudiesCategory/",
   UPLOAD_CASE_STUDY: "upload/caseStudies/",
+  UPLOAD_RESUME: process.env.UPLOAD_RESUME,
   FILE_UPLOAD_SIZE: process.env.FILE_UPLOAD_SIZE || 10000000000000,
   // ... other configuration values
 };
@@ -155,6 +156,12 @@ const caseStudiesCategoryImg = createImageMiddleware(
  */
 const caseStudyImg = createImageMiddleware(config.UPLOAD_CASE_STUDY);
 
+/**
+ * @constant {Function} resumePdf
+ * @description Middleware function for handling resume image uploads.
+ */
+const resumePdf = createImageMiddleware(config.UPLOAD_RESUME);
+
 module.exports = {
   categoryImg,
   productImg,
@@ -165,4 +172,5 @@ module.exports = {
   ServiceImg,
   caseStudiesCategoryImg,
   caseStudyImg,
+  resumePdf,
 };
