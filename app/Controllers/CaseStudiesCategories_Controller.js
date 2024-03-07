@@ -14,6 +14,7 @@ const checkPermission = (userInfo, entity, action) =>
 const handlePermission = (entity, action, uploadMiddleware, operation) => 
   asyncHandler(async (req, res, next) => {
     const { userId } = req;
+    console.log("userId", userId);
 
     if (!checkPermission(userId, entity, action)) {
       res

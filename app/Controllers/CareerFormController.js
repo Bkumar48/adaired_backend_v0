@@ -11,7 +11,6 @@ const checkPermission = (userInfo, entity, action) =>
 const handlePermission = (entity, action, uploadMiddleware, operation) =>
   asyncHandler(async (req, res, next) => {
     const { userId } = req;
-
     // Exclude permission check for create operation
     if (operation === createCareerForm) {
       try {
@@ -20,40 +19,30 @@ const handlePermission = (entity, action, uploadMiddleware, operation) =>
             console.error(err);
             return res.status(500).json({ error: err.message });
           }
-          const result = await operation(req, res, next);
-          const status = result ? 200 : 404;
-          //   res.status(status).json(result ? { result } : { error: "Not Found" });
+          await operation(req, res, next);
         });
       } catch (error) {
         console.error(error);
-        // res.status(500).json({ error: error.message });
+      }
+    } else if (operation === getCareerForm || operation === getCareerFormById) {
+      try {
+        await operation(req, res, next);
+      } catch (error) {
+        console.error(error);
       }
     } else {
+      console.log("userId", userId, entity, action);
       // Perform permission check for other operations
       if (!checkPermission(userId, entity, action)) {
         res
           .status(403)
           .json({ error: "You are not allowed to perform this action" });
       }
-
-      try {
-        await uploadMiddleware(req, res, async (err) => {
-          if (err) {
-            console.error(err);
-            return res.status(500).json({ error: err.message });
-          }
-          const result = await operation(req, res, next);
-          const status = result ? StatusCodes.ACCEPTED : StatusCodes.NOT_FOUND;
-        });
-      } catch (error) {
-        console.error(error);
-      }
     }
   });
 
 const createCareerForm = asyncHandler(async (req, res) => {
   const { name, email, phone, current_designation, message } = req.body;
-  const { userId } = req;
   const resume = uploadPath + req.files[0].filename;
   const careerForm = new CareerForm({
     name,
@@ -68,22 +57,19 @@ const createCareerForm = asyncHandler(async (req, res) => {
 });
 
 const getCareerForm = asyncHandler(async (req, res) => {
-  const { userId } = req;
   const result = await CareerForm.find();
   res.status(StatusCodes.OK).json({ result });
 });
 
 const getCareerFormById = asyncHandler(async (req, res) => {
-  const { userId } = req;
   const { id } = req.params;
   const result = await CareerForm.findById(id);
   res.status(StatusCodes.OK).json({ result });
 });
 
 const updateCareerForm = asyncHandler(async (req, res) => {
-  const { userId } = req;
   const { id } = req.params;
-  const { name, email, phone, current_designation, message } = req.body;
+  const { name, email, phone, current_designation, message, status } = req.body;
   const resume = req.files[0].filename;
   const result = await CareerForm.findByIdAndUpdate(
     id,
@@ -94,6 +80,7 @@ const updateCareerForm = asyncHandler(async (req, res) => {
       current_designation,
       resume,
       message,
+      status,
     },
     { new: true }
   );
@@ -101,10 +88,14 @@ const updateCareerForm = asyncHandler(async (req, res) => {
 });
 
 const deleteCareerForm = asyncHandler(async (req, res) => {
-  const { userId } = req;
-  const { id } = req.params;
-  const result = await CareerForm.findByIdAndDelete(id);
-  res.status(StatusCodes.OK).json({ result });
+  try {
+    const { id } = req.params;
+    const result = await CareerForm.findByIdAndDelete(id);
+    res.status(StatusCodes.OK).json({ result });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: error.message });
+  }
 });
 
 module.exports = {
